@@ -8,8 +8,8 @@ su vitalidad es La decima parte de su energia
 */
 object neo {
     var energia = 100
-    const elegido = true
-
+  
+  method esElElegido(){return true}
   method saltar(){energia = energia / 2}
   method vitalidad(){return energia / 10}
 }
@@ -23,12 +23,14 @@ empieza descansado y al saltar se cansa
 object morfeo {
     var vitalidad = 8
     var estaDescansado = true
-    const elegido = false
 
-  method saltar(){
-    vitalidad= vitalidad - 1 
+    method esElElegido(){return false}
+
+  method saltar(){ 
     estaDescansado = not estaDescansado
+    vitalidad = (vitalidad - 1).max(0)
   }
+
  /*
   otra forma= 
   if (estaDescansado) {
@@ -46,28 +48,56 @@ sabe decir su vitalidad SIEMPRE 0
 saltar no le afecta
 */
 object trinity {
-    const elegido = false
-
+    method esElElegido(){return false}
     method vitalidad(){return 0}
     method saltar(){}
 }
 
 object nave {
   const pasajeros = [neo, morfeo , trinity]
-
+  
+  //agregamos nosotros en la clase
+  method subirPasajeros(unPasajero){
+    pasajeros.add(unPasajero)
+  }
+  method bajarPasajeros(unPasajero){
+    pasajeros.remove(unPasajero)
+  }
   method cantidadDePasajeros(){
     return pasajeros.size()
   }
   method pasajeroConMayorVitalidad(){return pasajeros.max({p => p.vitalidad()})}
-  method estaEquilibradaEnVitalidad(){return pasajeros.all({p => p.vitalidad() })}
-  method elegidoEsta(){}
+  //otro ejemplo
+  method laMayorVitalidad(){
+    return pasajeros.max({unPasajero => unPasajero.vitalidad()}).vitalidad()
+  }  
+  method estaEquilibrada() {
+    //max <= min*2
+    //return self.pasajeroConMayorVitalidad().vitalidad() <= min*2
+    return pasajeros.all({ p1 => 
+        pasajeros.all({ p2 => p1.vitalidad() <= (p2.vitalidad() * 2) }) 
+    })
+}
+  method elegidoEsta(){return pasajeros.contains(neo)}
+  //return pasajeros.any({pasajero => pasajero.esElElegido()})
 
   // hechos que le suceden a la nave
   method chocar(){
-    pasajeros.saltar()
+    pasajeros.forEach({p => p.saltar()})
+    pasajeros.clear()
+
   }
   method acelerar(){
-    
+    // [ neo,trinity,morfeo]
+    //{trinity,morfeo}
+    pasajeros.filter({p => not p.esElElegido()}).forEach({p => p.saltar()})
+  
+  /*
+  pasajeros.forEach({p => if(not p.esElElegido()){
+                            p.saltar()
+                          }
+                        })
+  */
   }
 
 }
